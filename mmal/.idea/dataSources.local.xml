@@ -11,5 +11,15 @@
       <user-name>bdm30780631</user-name>
       <introspection-schemas>*:bdm30780631_db</introspection-schemas>
     </data-source>
+    <data-source name="mmal@localhost" uuid="365f68b9-fb47-49d4-89d5-81bde7b8e272">
+      <database-info product="MySQL" version="5.7.19" jdbc-version="4.0" driver-name="MySQL Connector Java" driver-version="mysql-connector-java-5.1.40 ( Revision: 402933ef52cad9aa82624e80acbea46e3a701ce6 )">
+        <extra-name-characters>#@</extra-name-characters>
+        <identifier-quote-string>`</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="mixed" quoted-identifiers="upper" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>root</user-name>
+      <introspection-schemas>*:mmal</introspection-schemas>
+    </data-source>
   </component>
 </project>

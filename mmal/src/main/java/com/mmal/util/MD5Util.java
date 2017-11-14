@@ -3,6 +3,7 @@ package com.mmal.util;
 
 
         import java.security.MessageDigest;
+        import java.util.Properties;
 
 public class MD5Util {
 
@@ -49,6 +50,8 @@ public class MD5Util {
             "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
 
     public static String MD5EncodeUtf8(String origin){
+//        origin = origin + PropertiesUtil.getProperty("password.salt", "");
+        origin = origin + PropertiesUtil.getProperty("password.salt", "");
         return MD5Encode(origin,"utf-8");
     }
 

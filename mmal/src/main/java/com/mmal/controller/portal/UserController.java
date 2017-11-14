@@ -1,12 +1,12 @@
 package com.mmal.controller.portal;
 
 import com.mmal.common.Const;
-import com.mmal.common.ServiceResponse;
+import com.mmal.common.ResponseCode;
+import com.mmal.common.ServerResponse;
 import com.mmal.pojo.User;
 import com.mmal.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -26,10 +26,10 @@ public class UserController {
     * */
     @RequestMapping(value = "login.do",method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse<User> login(String username, String password, HttpSession session){
+    public ServerResponse<User> login(String username, String password, HttpSession session){
         // service --> mybatis --> dao
 
-        ServiceResponse<User> response = iUserService.login(username,password);
+        ServerResponse<User> response = iUserService.login(username,password);
         if(response.isSuccesee()){
             session.setAttribute(Const.CURRENT_USER,response.getData());
         }
@@ -40,25 +40,101 @@ public class UserController {
     /*
     * 用户退出登录
     * */
-    @RequestMapping(value = "logout.do", method = RequestMethod.GET)
+    @RequestMapping(value = "logout.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse<String> logout(HttpSession session){
+    public ServerResponse<String> logout(HttpSession session){
         session.removeAttribute(Const.CURRENT_USER);
-        return ServiceResponse.createBySuccess();
+        return ServerResponse.createBySuccess();
     }
 
-    @RequestMapping(value = "register.do", method = RequestMethod.GET)
+    @RequestMapping(value = "register.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse<String> register(User user){
+    public ServerResponse<String> register(User user){
         return iUserService.register(user);
     }
 
-    @RequestMapping(value = "check_valid.do", method = RequestMethod.GET)
+
+    @RequestMapping(value = "check_valid.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse<String> checkValid(String str, String type){
+    public ServerResponse<String> checkValid(String str, String type){
         return iUserService.checkValid(str, type);
     }
 
+
+    @RequestMapping(value = "get_user_info.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServerResponse<User> getUserInfo(HttpSession session){
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+
+        if(user != null){
+            return ServerResponse.createBySuccess(user);
+        }
+        return ServerResponse.createByErrorMessage("用户未登录，无法获取当前用户的信息");
+    }
+
+    @RequestMapping(value = "forget_get_question.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServerResponse<String> forgetGetQuestion(String username){
+        return iUserService.selectQuestion(username);
+    }
+
+    @RequestMapping(value = "forget_check_answer.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServerResponse<String> forgetCheckAnswer(String username, String question, String answer){
+
+        return iUserService.checkAnswer(username,question,answer);
+    }
+
+    @RequestMapping(value = "forget_reset_password.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServerResponse<String> forgetResetPassword(String username, String passwordNew, String forgetTocken){
+        return iUserService.forgetResetPassword(username,passwordNew,forgetTocken);
+    }
+
+    /**
+     * 登录状态下的重置密码
+     * @param session
+     * @param passwordOld
+     * @param passwordNew
+     * @return
+     */
+    @RequestMapping(value = "reset_password.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServerResponse<String> resetPassword(HttpSession session, String passwordOld, String passwordNew){
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if(user == null){
+            return ServerResponse.createByErrorMessage("用户未登录");
+        }
+
+        return iUserService.resetPassword(passwordOld,passwordNew,user);
+    }
+
+    @RequestMapping(value = "update_information.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServerResponse<User> update_information(HttpSession session, User user){
+        User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
+        if(currentUser == null){
+            return ServerResponse.createByErrorMessage("用户未登录");
+        }
+
+        user.setId(currentUser.getId());
+        user.setUsername(currentUser.getUsername());
+        ServerResponse response = iUserService.updateInfomation(user);
+        if(response.isSuccesee()){
+            session.setAttribute(Const.CURRENT_USER,response.getData());
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "get_information.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServerResponse<User> get_information(HttpSession session){
+        User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
+        if(currentUser == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"未登录，需要强制登录，status = 10");
+        }
+        return iUserService.getInformation(currentUser.getId());
+    }
 
 
 
