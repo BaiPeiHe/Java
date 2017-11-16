@@ -3,7 +3,7 @@ package com.mmal.service;
 import com.mmal.common.ServerResponse;
 import com.mmal.pojo.User;
 
-interface IUserService {
+public interface IUserService {
 
     ServerResponse<User> login(String username, String password);
 
